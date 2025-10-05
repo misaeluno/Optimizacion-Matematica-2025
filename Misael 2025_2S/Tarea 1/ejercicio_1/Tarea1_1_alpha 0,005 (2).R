@@ -13,11 +13,9 @@ f_prima <- function(x){
 }
 #--------------------------
 #aprendisaje
-#gama <- 0.5
-#gama <- 0.7
-gama <- 0.9
+#alpha <- 0.01
+#alpha <- 0.001
 alpha <- 0.005
-v <- c(0,0)
 x <- c(-2.5,2.5)
 #-----------------
 #constantes
@@ -31,11 +29,8 @@ for (i in 1:max_inter){
   #Cada vez que entra suma 1 para tener la cantidad de iteracion
   contador <- contador + 1
   #-----------------
-  #calculo de la velocidad
-  v <- (gama * v) + f_prima(x)
-  #-----------------
   #calculo del nuevo X
-  x_nuevo <- x - alpha*v
+  x_nuevo <- x - alpha*f_prima(x)
   #-----------------
   #retriccion para evitar errores
   if(norm(f_prima(x_nuevo), "2") < tolerancia | 
@@ -46,8 +41,6 @@ for (i in 1:max_inter){
   #remplazaomos X original por X nuevo para repetir el ciclo
   x <- x_nuevo
 }
-cat("El número de iteraciones necesarias es:", contador, "\n")
-cat("El valor de alpha es:", alpha, "\n")
-cat("el valor de Gama es: ",gama, "\n")
-cat("El punto mínimo encontrado es:", x_nuevo, "\n")
-cat("El valor de la función en ese punto es:", f(x_nuevo), "\n")
+cat("el nuemro de interaciones necesaria es: ",contador, "\n")
+cat("el valor de Gama es: ",alpha, "\n")
+cat("el valor del punto es: ",x)
