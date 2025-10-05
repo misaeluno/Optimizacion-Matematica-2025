@@ -46,6 +46,8 @@ for (i in 1:max_inter){
   #remplazaomos X original por X nuevo para repetir el ciclo
   x <- x_nuevo
 }
-cat("el nuemro de interaciones necesaria es: ",contador, "\n")
+cat("El número de iteraciones necesarias es:", contador, "\n")
+cat("El valor de alpha es:", alpha, "\n")
 cat("el valor de Gama es: ",gama, "\n")
-cat("el valor del punto es: ",x)
+cat("El punto mínimo encontrado es:", x_nuevo, "\n")
+cat("El valor de la función en ese punto es:", f(x_nuevo), "\n")
