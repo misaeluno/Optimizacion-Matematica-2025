@@ -69,7 +69,7 @@ points(x_nuevo[1], x_nuevo[2], pch = 20, col = "black", cex = 2)
 plot(contador, alpha,
      xlim = c(0, max_inter), ylim = c(0.001,0.003), 
      xlab = "Iteraciones", ylab = "Alpha",
-     main = "Decaimiento de Alpha",
+     main = "Alpha constante",
      type = "n")
 grid()  # Gráfico vacío
 

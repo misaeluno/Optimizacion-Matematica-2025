@@ -75,7 +75,7 @@ points(x_nuevo[1], x_nuevo[2], pch = 20, col = "black", cex = 2)
 plot(contador, alpha_k,
      xlim = c(0, max_inter), ylim = c(0.00199,0.002), 
      xlab = "Iteraciones", ylab = "Alpha",
-     main = "Decaimiento de Alpha",
+     main = "Alpha exponencial",
      type = "n")
 grid()  # Gráfico vacío
 for (i in 1:max_inter){
