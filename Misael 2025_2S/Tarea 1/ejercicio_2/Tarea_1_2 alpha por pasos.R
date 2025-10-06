@@ -46,7 +46,7 @@ for (i in 1:max_inter){
   #-----------------
   
   #calcular alfa k
-  alpha_k <- (alpha)*(d**(i/s))
+  alpha_k <- (alpha)*(d^floor(i/s))
   #calculo del nuevo X
   x_nuevo <- x - alpha_k*f_gran(x)
   #-----------------
@@ -73,7 +73,7 @@ points(x_nuevo[1], x_nuevo[2], pch = 20, col = "black", cex = 2)
 #-----------------------------------------------------------------
 
 plot(contador, alpha_k,
-     xlim = c(0, max_inter), ylim = c(0.00199,0.002), 
+     xlim = c(0, max_inter), ylim = c(0,0.002), 
      xlab = "Iteraciones", ylab = "Alpha",
      main = "Decaimiento de Alpha",
      type = "n")

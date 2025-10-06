@@ -7,3 +7,6 @@ hiciste
 ejemplo:  "Misael 2025_2S"
 
 PUEDEN TRABAJAR EN MAIN siempre y cuando solo toquen su carpeta no la de otros
+
+"Comandos Git Hub"
+https://docs.google.com/document/d/1TcyrO9aCYhl3OVKW0vP2LiwQtTjNfKj6QGDLllyTuZs/edit?usp=sharing

@@ -34,15 +34,39 @@ contador <- 0
 distancia_total <- 0
 #-----------------
 
+#malla para curva de nivel
+x1_seq <- seq(-4, -1, length.out = 500)  # Rango en x1
+x2_seq <- seq(1, 6, length.out = 500)  # Rango en x2
+#-----------------
+
+# 2. Calcular f(x1, x2) para cada punto de la malla
+z <- matrix(NA, nrow = length(x1_seq), ncol = length(x2_seq))
+for (i in 1:length(x1_seq)) {
+  for (j in 1:length(x2_seq)) {
+    z[i, j] <- f(c(x1_seq[i], x2_seq[j]))
+  }
+}
+#-----------------
+
 # Inicializar gráfico
-plot(x[1], x[2], xlim = c(-3, -2), ylim = c(0, 4), 
-     xlab = "x", ylab = "y", main = "Descenso de Gradiente - Función Himmelblau",
-     pch = 20, col = "blue", cex = 2)
+contour(x1_seq, x2_seq, z, 
+        nlevels = 30,           # Número de curvas
+        col = "black",      # Color de las curvas
+        lwd = 1,
+        xlim = c(-3, -2), 
+        ylim = c(2, 4),
+        xlab = "x1", 
+        ylab = "x2",
+        main = "Descenso de Gradiente sobre Himmelblau")
 #-----------------
 
 # Agregar leyenda
-legend("topright", legend = c("Inicio", "Trayectoria", "Final"), 
-       col = c("blue", "red", "black"), pch = 20, cex = 1)
+legend("topright", legend = c("Inicio", "Trayectoria", "Final", "inicial"), 
+       col = c("blue", "red", "black","orange"), pch = 20, cex = 1)
+#-----------------
+
+#Punto inicial
+points(-2.5, 2.5, pch = 20, col = "orange", cex = 2)
 #-----------------
 
 for (i in 1:max_inter){
