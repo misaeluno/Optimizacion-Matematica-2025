@@ -15,7 +15,7 @@ gran_f <- function(param){
   x <- param[1]
   y <- param[2]
   
-  dx <- 4*x - (1.05*4+(x**3)) + (x**5) + y
+  dx <- 4*x - (1.05*4*(x**3)) + (x**5) + y
   dy <- x + 2*y
   
   return(c(dx,dy))
@@ -72,8 +72,8 @@ historial_f <- historial_f[1:i]
 
 # GRAFICAMOS 
 # Crear curvas de nivel
-x_seq <- seq(-3, 3, length.out = 100)
-y_seq <- seq(-1, 3, length.out = 100)
+x_seq <- seq(1.5, 4.5, length.out = 100)
+y_seq <- seq(-3, 1.5, length.out = 100)
 z <- outer(x_seq, y_seq, f_objetivo)
 
 contour(x_seq, y_seq, z, 
