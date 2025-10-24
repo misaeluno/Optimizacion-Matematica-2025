@@ -40,7 +40,7 @@ N=len(X)
 print(N)
 Beta0 = 1
 Beta1 = 1
-iteraciones=50
+iteraciones=10000
 resto=0
 alpha = 0.02
 

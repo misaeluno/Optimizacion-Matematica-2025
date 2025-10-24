@@ -1,0 +1,94 @@
+# EJEMPLO
+# -------
+# 
+# f(x, y) = x^2 + 2 * y^2 + 10, x, y en (-10, 10)
+
+# GRAFICO
+# -------
+
+f <- function(x, y) {
+    x^2 + 2 * y^2 + 10
+}
+
+x <- y <- seq(from = -10, to = 10, by = 0.5)
+z <- outer(x, y, f)
+
+par(mar = c(4, 4, 1, 1))
+persp(x, y, z, theta = 35, phi = 20, col = "darkred")
+contour(x, y, z, xlab = "x", ylab = "y", nlevels = 30)
+
+# OPTIMIZACIÓN: BÚSQUEDA POR FUERZA BRUTA
+# ---------------------------------------
+
+f_obj <- function(v) {
+    x <- v[1]
+    y <- v[2]
+    x^2 + 2 * y^2 + 10
+}
+
+step <- 1
+x <- y <- seq(from = -10, to = 10, by = step)
+
+# Construir la grilla del espacio de búsqueda
+
+search_grid <- expand.grid(x, y)
+
+# Gráfico grilla
+
+points(search_grid, pch = 20, col = "darkgreen")
+
+# Evaluamos la función
+
+z <- apply(search_grid, 1, f_obj)
+
+# Identificar el índice del mínimo
+
+indice <- which.min(z)
+
+# Obtener la solución óptima
+
+punto_optimo <- search_grid[indice, ]
+z_min <- z[indice]
+
+# Mostrar resultados
+
+cat("El valor mínimo de f(x, y) es:", z_min,
+    "\nEl valor óptimo de (x, y) es:", paste(punto_optimo))
+
+points(punto_optimo, pch = 19, col = "red")
+
+# OPTIMIZACIÓN: BÚSQUEDA ALEATORIA
+# --------------------------------
+
+#set.seed(2025)
+n <- 25
+x <- runif(n, min = -10, max = 10)
+y <- runif(n, min = -10, max = 10)
+
+# Construir la grilla del espacio de búsqueda
+
+search_grid <- expand.grid(x, y)
+
+# Grafico grilla
+
+points(search_grid, pch = 20, col = "darkgreen")
+
+# Evaluamos la función
+
+z <- apply(search_grid, 1, f_obj)
+
+# Identificar el índice del mínimo
+
+indice <- which.min(z)
+
+# Obtener la solución óptima
+
+punto_optimo <- search_grid[indice, ]
+z_min <- z[indice]
+
+# Mostrar resultados
+
+cat("El valor mínimo de f(x, y) es:", z_min,
+    "\nEl valor óptimo de (x, y) es:", paste(punto_optimo))
+
+points(punto_optimo, pch = 19, col = "red")
