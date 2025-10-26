@@ -10,16 +10,16 @@ import time
 
 #funcion inicial respecto a X["x","y"]
 def f(x):
-    return ((x[0]^2 + x[1] -11)^2 +(x[0] + x[1]^2 -7)^2)
+    return ((x[0]**2 + x[1] -11)**2 +(x[0] + x[1]**2 -7)**2)
 #--------------------------------------------
 
 #funcion grandiente de la funcion inicial
 def gradiente_f(x):
     #el comando "np.array" sirve para difinir que el valor sera un vector
     #separado por la ","
-    dx = (2*(x[0]^2 + x[1] -11)*(2*x)) + 2*(x[0] + x[1]^2 -7)
-    dy = (2*(x[0]^2 + x[1] -11)) + (2*(x[0] + x[1]^2 -7)*(2*x[1]))
-    return np.array([dx, dy])
+    dx = ((2*(x[0]**2 + x[1] -11)*(2*x[0])) + 2*(x[0] + x[1]**2 -7))
+    dy = (2*(x[0]**2 + x[1] -11)) + (2*(x[0] + x[1]**2 -7)*(2*x[1]))
+    return np.array([dx,dy])
 #--------------------------------------------
 
 #similimar a la matriz hessiana inversa
@@ -118,6 +118,52 @@ print("RESULTADO FINAL")
 print("="*50)
 print(f"Punto óptimo encontrado: x = {x_optimo}")
 print(f"Valor de la función: f(x) = {f(x_optimo):.10f}")
+print("el valor de lafuncion teorica es 0.0")
 print(f"Gradiente final: ∇f(x) = {gradiente_f(x_optimo)}")
-print(f"Solución teórica: x = [2, -3]")
 print(f"Número de iteraciones: {len(trayectoria) - 1}")
+
+# gracios de marco de graficos
+fig = plt.figure(figsize=(14, 6))
+
+# Datos necesarios para los gráficos
+x_range = np.linspace(-6, 6, 100)
+y_range = np.linspace(-6, 6, 100)
+X, Y = np.meshgrid(x_range, y_range)
+Z = (X**2 + Y - 11)**2 + (X + Y**2 - 7)**2  # Función de Himmelblau
+
+# Trazar trayectoria
+trayectoria_array = np.array(trayectoria)
+
+# Grafico 1
+ax1 = fig.add_subplot(121, projection='3d')
+ax1.plot_surface(X, Y, Z, alpha=0.6, cmap='viridis')
+
+z_tray = [f(punto) for punto in trayectoria]
+ax1.plot(trayectoria_array[:, 0], trayectoria_array[:, 1], z_tray, 
+         'r.-', linewidth=2, markersize=8, label='Trayectoria BFGS')
+
+ax1.set_xlabel('x')
+ax1.set_ylabel('y')
+ax1.set_zlabel('f(x,y)')
+ax1.set_title('Optimización BFGS - Vista 3D')
+ax1.legend()
+
+# Gráfico de contorno
+ax2 = fig.add_subplot(122)
+
+contour = ax2.contour(X, Y, Z, levels=30, cmap='viridis')
+ax2.clabel(contour, inline=True, fontsize=8)
+ax2.plot(trayectoria_array[:, 0], trayectoria_array[:, 1], 
+         'r.-', linewidth=2, markersize=8, label='Trayectoria BFGS')
+
+ax2.scatter([0], [0], color='blue', s=100, marker='o', 
+            label='Punto inicial', zorder=5)
+
+ax2.set_xlabel('x')
+ax2.set_ylabel('y')
+ax2.set_title('Optimización BFGS - Curvas de nivel')
+ax2.legend()
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
