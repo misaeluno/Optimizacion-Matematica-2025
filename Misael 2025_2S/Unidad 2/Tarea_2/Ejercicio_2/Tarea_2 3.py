@@ -4,15 +4,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 import time
+# encontrar la funcion
+# f(x,y) = (x^2 + y −11)^2 +(x  + y^2 −7)^2
 
+
+#funcion inicial respecto a X["x","y"]
 def f(x):
-    return (1- x[0])**2 + 100*(x[1] - x[0]**2)**2
+    return ((x[0]^2 + x[1] -11)^2 +(x[0] + x[1]^2 -7)^2)
+#--------------------------------------------
 
+#funcion grandiente de la funcion inicial
 def gradiente_f(x):
-    dx = -2*(1 - x[0]) - 400*x[0]*(x[1] - x[0]**2)
-    dy = 200*(x[1] - x[0]**2)
+    #el comando "np.array" sirve para difinir que el valor sera un vector
+    #separado por la ","
+    dx = (2*(x[0]^2 + x[1] -11)*(2*x)) + 2*(x[0] + x[1]^2 -7)
+    dy = (2*(x[0]^2 + x[1] -11)) + (2*(x[0] + x[1]^2 -7)*(2*x[1]))
     return np.array([dx, dy])
-
+#--------------------------------------------
 
 #similimar a la matriz hessiana inversa
 def Pk(Hk, gradiente):
@@ -24,17 +32,19 @@ def Pk(Hk, gradiente):
 #Calcular alpha nuevo 
 def alfa(pk, x, gradiente, funcion_ini):
     c = 0.0001
-    iteraciones_alpha = 100  
+    iteraciones_alpha = 100                  #valor para cambiar alpha si es que esta nunca es suficnetemente menor
     alpha = 1.0
-    Pk_grad = np.dot(gradiente, pk)
+    Pk_grad = np.dot(gradiente, pk)          #para el PC es mas facil hacer esta operacion por separado
     
-    for _ in range(iteraciones_alpha):  
-        n = x + (alpha * pk)
+    for _ in range(iteraciones_alpha):
+        n = x + (alpha * pk)                 #se necesita un valor tipo vector para usar la funcion
         auxiliar = f(n)
-        
+        #mientras que:
+            #La funcion inicial segun el vector N   sea mayor a     
+                #funcion inicial original + c * alpha y * el gradiente inversa * Pk 
         if auxiliar <= funcion_ini + (c * alpha * Pk_grad):
-            break
-        alpha *= 0.5
+            break                            # Condición cumplida
+        alpha *= 0.5                         # Reducir el paso  
     
     return alpha
 #--------------------------------------------
@@ -67,12 +77,12 @@ def Hk1(x, xk1, gradiente_f, H):
 
 #main
 def BFGS():
-    #el valor inicial de X es el punto -10 y +10
-    x = np.array([-1,-1])
     #el H iniciial es la matriz identidad
-    H = np.identity(len(x))
+    H = np.identity(2)
+    #el valor inicial de X es el punto -10 y +10
+    x = np.array([0,0])
     max_iteraciones = 1000
-    tolerancia = 1e-15
+    tolerancia = 1e-6
     cont=0
     # Almacenar trayectoria
     trayectoria = [x.copy()]
@@ -109,4 +119,5 @@ print("="*50)
 print(f"Punto óptimo encontrado: x = {x_optimo}")
 print(f"Valor de la función: f(x) = {f(x_optimo):.10f}")
 print(f"Gradiente final: ∇f(x) = {gradiente_f(x_optimo)}")
+print(f"Solución teórica: x = [2, -3]")
 print(f"Número de iteraciones: {len(trayectoria) - 1}")
