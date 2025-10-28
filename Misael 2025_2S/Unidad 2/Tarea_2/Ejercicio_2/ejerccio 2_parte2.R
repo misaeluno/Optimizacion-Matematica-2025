@@ -74,7 +74,7 @@ gradiente <- function(beta, t_data, y_data) {
   r <- calcular_r(beta, t_data, y_data)
   
   # Gradiente: ∇S(β) = -2·J^T·r
-  grad <- -2 * t(J) %*% r
+  grad <- 2 * t(J) %*% r
   
   # Convertir matriz (4×1) a vector
   return(as.vector(grad))
