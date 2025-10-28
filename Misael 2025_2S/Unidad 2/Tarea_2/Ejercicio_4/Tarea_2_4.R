@@ -2,6 +2,7 @@
 f <- function(x) {
   return(0.5*(x[1]**2)  + 2.5*(x[2]**2) -2*x[1]*x[2]  - x[1]**3 )
 }
+
 #-------------------------------------------------------------------------------
 # Definimos el vector gradiente de la función
 gradiente_f <- function(x) {
@@ -9,6 +10,7 @@ gradiente_f <- function(x) {
   dy <- 5*x[2] - 2*x[1]
   return(c(dx, dy))
 } 
+
 #-------------------------------------------------------------------------------
 # Definimos la matriz Hessiana de la función
 hessiana_f <- function(x) {
@@ -20,6 +22,7 @@ hessiana_f <- function(x) {
                 dyx, dyy ), nrow = 2, byrow = TRUE)
   return(H)
 }
+
 #-------------------------------------------------------------------------------
 # Definimos la matriz Hessiana regularizada de la función
 hessiana_R <- function(x, c_base = 1e-4) {
@@ -49,12 +52,14 @@ hessiana_R <- function(x, c_base = 1e-4) {
     return(H)
   }
 }
+
 #-------------------------------------------------------------------------------
 # Parámetros del algoritmo
 valor_inicial <- c(1.5, 0.5)# Definimos la función objetivo
 f <- function(x) {
   return(0.5*(x[1]**2)  + 2.5*(x[2]**2) -2*x[1]*x[2]  - x[1]**3 )
 }
+
 #-------------------------------------------------------------------------------
 # Definimos el vector gradiente de la función
 gradiente_f <- function(x) {
@@ -62,6 +67,7 @@ gradiente_f <- function(x) {
   dy <- 5*x[2] - 2*x[1]
   return(c(dx, dy))
 } 
+
 #-------------------------------------------------------------------------------
 # Definimos la matriz Hessiana de la función
 hessiana_f <- function(x) {
@@ -73,6 +79,7 @@ hessiana_f <- function(x) {
                 dyx, dyy ), nrow = 2, byrow = TRUE)
   return(H)
 }
+
 #-------------------------------------------------------------------------------
 # Definimos la matriz Hessiana regularizada de la función
 hessiana_R <- function(x, delta = 1) {
@@ -86,6 +93,8 @@ hessiana_R <- function(x, delta = 1) {
   H_reg <- H - valores_propios_reg
   return(H_reg)
 }
+
+#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 # Parámetros del algoritmo
 valor_inicial <- c(1.5, 0.5)
@@ -93,6 +102,7 @@ tol <- 1e-6
 max_inter <- 10000  # Aumentamos las iteraciones por si acaso, aunque no sean necesarias aquí
 iteraciones <- 0
 iteraciones_r <- 0
+
 #-------------------------------------------------------------------------------
 # Bucle del método de Newton
 x_k_h <- valor_inicial
@@ -131,10 +141,12 @@ for (i in 1:max_inter) {
     break
   }
   #print(paste(x_k1_r))
+  
   #-----------------------------------------------------------------------------
   # Criterios de parada
   if (all(abs(gradiente_f(x_k1_r)) < tol) || all(abs(x_k1_r - x_k_r) < tol)) {
     cat("Hessiana regularizada paró en iteración:", iteraciones_r, "\n")
+    
     # Guardar punto final
     historial_x_R <- c(historial_x_R, x_k1_r[1])
     historial_y_R <- c(historial_y_R, x_k1_r[2])
@@ -156,12 +168,13 @@ for (i in 1:max_inter) {
   historial_f_H[i] <- f(x_k_h)
   
   iteraciones <- iteraciones + 1
+  
   #-----------------------------------------------------------------------------
   # Calculamos el siguiente punto
   paso_newton_H <- solve(hessiana_f(x_k_h)) %*% gradiente_f(x_k_h) #H^-1 * F
   x_k1_h <- x_k_h - paso_newton_H                                  #X - (H^-1 * F)
-  
   #-----------------------------------------------------------------------------
+  
   # Criterios de parada
   if (all(abs(gradiente_f(x_k1_h)) < tol) || all(abs(x_k1_h - x_k_h) < tol)) {
     cat("paramos en iteracion = ",iteraciones)
@@ -172,6 +185,8 @@ for (i in 1:max_inter) {
   x_k_h <- x_k1_h
 }
 
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Si no esta no funciona 
 #------NO BORRAR---------
 historial_x_H <- historial_x_H[1:i]
@@ -183,8 +198,8 @@ historial_f_H <- historial_f_H[1:i]
 historial_x_R <- historial_x_R[1:i]
 historial_y_R <- historial_y_R[1:i]
 historial_f_R <- historial_f_R[1:i]
-#-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
 # 1. Curvas de nivel para Hessiana normal
 x_seq_H <- seq(-2, 2, length.out = 100)
 y_seq_H <- seq(-2, 2, length.out = 100)
@@ -192,20 +207,23 @@ y_seq_H <- seq(-2, 2, length.out = 100)
 # 1. Curvas de nivel para Hessiana Regularizada
 x_seq_R <- seq(-2, 2, length.out = 100)
 y_seq_R <- seq(-2, 2, length.out = 100)
+
 #-------------------------------------------------------------------------------
 #funcion para obtener Z
 f_outer <- function(x, y) {
   return(0.5*x^2 + 2.5*y^2 - 2*x*y - x^3)
 }
+
 #-------------------------------------------------------------------------------
 #creacion de marco de graficos
 par(mfrow = c(1, 2))
+
 #-------------------------------------------------------------------------------
 #valor de Z
 z_H <- outer(x_seq_H, y_seq_H, f_outer)
 z_R <- outer(x_seq_R, y_seq_R, f_outer)
-#-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
 #Grafico de Hessina Normal
 contour(x_seq_H, y_seq_H, z_H,  
         nlevels = 30, 
@@ -219,6 +237,7 @@ points(historial_x_H, historial_y_H, pch = 20, col = "red", cex = 1)
 points(historial_x_H[1], historial_y_H[1], pch = 19, col = "green", cex = 2)
 points(historial_x_H[i], historial_y_H[i], pch = 19, col = "blue", cex = 2)
 
+#-------------------------------------------------------------------------------
 #Grafico de Hessina Regularizada
 contour(x_seq_R, y_seq_R, z_R,  
         nlevels = 30, 
@@ -233,7 +252,7 @@ points(historial_x_R[1], historial_y_R[1], pch = 19, col = "green", cex = 2)
 points(historial_x_R[i], historial_y_R[i], pch = 19, col = "blue", cex = 2)
 
 #-------------------------------------------------------------------------------
-
+#-------------------------------------------------------------------------------
 # Resultados
 cat("\n=== RESULTADOS ===\n")
 cat("\nHessiana Normal:\n")

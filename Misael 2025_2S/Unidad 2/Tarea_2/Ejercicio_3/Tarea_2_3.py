@@ -11,7 +11,7 @@ import time
 #funcion inicial respecto a X["x","y"]
 def f(x):
     return ((x[0]**2 + x[1] -11)**2 +(x[0] + x[1]**2 -7)**2)
-#--------------------------------------------
+#---------------------------------------------------------------------------------------------------
 
 #funcion grandiente de la funcion inicial
 def gradiente_f(x):
@@ -20,14 +20,14 @@ def gradiente_f(x):
     dx = ((2*(x[0]**2 + x[1] -11)*(2*x[0])) + 2*(x[0] + x[1]**2 -7))
     dy = (2*(x[0]**2 + x[1] -11)) + (2*(x[0] + x[1]**2 -7)*(2*x[1]))
     return np.array([dx,dy])
-#--------------------------------------------
+##---------------------------------------------------------------------------------------------------
 
 #similimar a la matriz hessiana inversa
 def Pk(Hk, gradiente):
     # Se usa la multiplicación matricial @
     pk = -Hk @ gradiente
     return pk
-#--------------------------------------------
+#---------------------------------------------------------------------------------------------------
 
 #Calcular alpha nuevo 
 def alfa(pk, x, gradiente, funcion_ini):
@@ -35,7 +35,8 @@ def alfa(pk, x, gradiente, funcion_ini):
     iteraciones_alpha = 100                  #valor para cambiar alpha si es que esta nunca es suficnetemente menor
     alpha = 1.0
     Pk_grad = np.dot(gradiente, pk)          #para el PC es mas facil hacer esta operacion por separado
-    
+    #------------------------------------------------------------------------------------------------
+
     for _ in range(iteraciones_alpha):
         n = x + (alpha * pk)                 #se necesita un valor tipo vector para usar la funcion
         auxiliar = f(n)
@@ -47,13 +48,13 @@ def alfa(pk, x, gradiente, funcion_ini):
         alpha *= 0.5                         # Reducir el paso  
     
     return alpha
-#--------------------------------------------
+#--------------------------------------------------------------------------------------------------
 
 #calcular nuevo X
 def x1(x,alpha,pk):
     x1= x + (alpha*pk)
     return(x1)
-#--------------------------------------------
+#--------------------------------------------------------------------------------------------------
 
 #calculkalr H nuevo
 def Hk1(x, xk1, gradiente_f, H):
@@ -64,71 +65,83 @@ def Hk1(x, xk1, gradiente_f, H):
     Yk_Sk = np.dot(Yk, Sk)                  #Producto punto entre Yk * Sk
     if abs(Yk_Sk) < 1e-10:                  #si este resultado es muy pequeño conseguimos 
         return H                            #el K nuevo
-    
+    #----------------------------------------------------------------------------------------------
     # Fórmula BFGS
     term1 = I - np.outer(Sk, Yk) /Yk_Sk
     term2 = I - np.outer(Yk, Sk) /Yk_Sk
     term3 = np.outer(Sk, Sk) /Yk_Sk
-    
+    #----------------------------------------------------------------------------------------------
     Hk_1 = term1 @ H @ term2 + term3
     
     return Hk_1
-#--------------------------------------------
+#--------------------------------------------------------------------------------------------------
 
 #main
 def BFGS(x_inicial):
     #el H iniciial es la matriz identidad
     H = np.identity(2)
+    #----------------------------------------------------------------------------------------------
     #el valor inicial de X es el punto -10 y +10
     x = x_inicial
     max_iteraciones = 1000
     tolerancia = 1e-6
     cont=0
+    #----------------------------------------------------------------------------------------------
     # Almacenar trayectoria
     trayectoria = [x.copy()]
 
     for i in range(max_iteraciones):
         cont=cont+1 
+        #------------------------------------------------------------------------------------------
+
         # Calcular función y gradiente
         funcion = f(x)
         gradiente = gradiente_f(x)
+        #------------------------------------------------------------------------------------------
 
         # Verificar convergencia
         norma_grad = np.linalg.norm(gradiente)
         if norma_grad < tolerancia:
             print(f"Convergencia alcanzada en iteración {i}")
             break
-        
+        #------------------------------------------------------------------------------------------
+
         #calular cosas nuevas
         pk = Pk(H, gradiente)                       # Calcular dirección de búsqueda
         alpha = alfa(pk, x, gradiente, funcion)     # Búsqueda de línea
         X = x1(x, alpha, pk)                        # Actualizar x
         H = Hk1(x, X, gradiente_f, H)               # Actualizar Hk
+        #-------------------------------------------------------------------------------------------
+
         #el X original sera el valor de X nuevo 
         x = X                               
         trayectoria.append(x.copy())
             
     return x, trayectoria
-
+#---------------------------------------------------------------------------------------------------
   
 # Ejecutar optimización
 x_inicial_1 = np.array([0,0])
 x_inicial_2 = np.array([-1,3])
 x_inicial_3 = np.array([4,-2])
+#---------------------------------------------------------------------------------------------------
 
 x_optimo = [None] * 3
 trayectoria = [None] * 3
+#---------------------------------------------------------------------------------------------------
 
 # Ejecutar BFGS desde cada punto inicial
 resultados = []
 opt1, tray1 = BFGS(x_inicial_1)
 resultados.append((opt1, tray1))
+#---------------------------------------------------------------------------------------------------
 
 opt2, tray2 = BFGS(x_inicial_2)
 resultados.append((opt2, tray2))
 
 opt3, tray3 = BFGS(x_inicial_3)
 resultados.append((opt3, tray3))
+#---------------------------------------------------------------------------------------------------
 
 for i, (x_opt, tray) in enumerate(resultados, 1):
     print(f"RESULTADO {i}")
@@ -137,18 +150,22 @@ for i, (x_opt, tray) in enumerate(resultados, 1):
     print(f"Gradiente final: ∇f(x) = {gradiente_f(x_opt)}")
     print(f"Número de iteraciones: {len(tray) - 1}")
     print('='*10)
+#---------------------------------------------------------------------------------------------------
 
 # gracios de marco de graficos
 fig = plt.figure(figsize=(14, 6))
+#---------------------------------------------------------------------------------------------------
 
 # Datos necesarios para los gráficos
 x_range = np.linspace(-6, 6, 100)
 y_range = np.linspace(-6, 6, 100)
 X, Y = np.meshgrid(x_range, y_range)
 Z = (X**2 + Y - 11)**2 + (X + Y**2 - 7)**2  # Función de Himmelblau
+#---------------------------------------------------------------------------------------------------
 
 # Trazar trayectoria
 trayectoria_array = np.array(trayectoria)
+#---------------------------------------------------------------------------------------------------
 
 # Grafico 1
 ax1 = fig.add_subplot(121, projection='3d')
@@ -169,6 +186,7 @@ ax1.set_ylabel('y')
 ax1.set_zlabel('f(x,y)')
 ax1.set_title('Optimización BFGS - Vista 3D')
 ax1.legend()
+#---------------------------------------------------------------------------------------------------
 
 # Gráfico de contorno
 ax2 = fig.add_subplot(122)
@@ -192,6 +210,7 @@ ax2.set_ylabel('y')
 ax2.set_title('Optimización BFGS - Curvas de nivel')
 ax2.legend()
 ax2.grid(True, alpha=0.3)
+#---------------------------------------------------------------------------------------------------
 
 plt.tight_layout()
 plt.show()
