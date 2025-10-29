@@ -25,63 +25,6 @@ hessiana_f <- function(x) {
 
 #-------------------------------------------------------------------------------
 # Definimos la matriz Hessiana regularizada de la función
-hessiana_R <- function(x, c_base = 1e-4) {
-  H <- hessiana_f(x)
-  
-  # Calcular valores propios para verificar si la matriz es definida positiva
-  valores_propios <- eigen(H, only.values = TRUE)$values
-  
-  # Si algún valor propio es <= 0, necesitamos regularizar
-  if (any(valores_propios <= 0)) {
-    # Encontrar el valor propio más negativo
-    min_eigenval <- min(valores_propios)
-    
-    # Elegir c suficientemente grande para hacer la matriz positiva definida
-    # c debe ser mayor que |min_eigenval| más un pequeño margen
-    c <- abs(min_eigenval) + c_base
-    
-    # Regularizar: H_mod = H + c*I
-    I <- diag(nrow(H))
-    H_modificada <- H + c * I
-    
-    cat(sprintf("  [Regularización aplicada: c = %.6f, λ_min = %.6f]\n", c, min_eigenval))
-    
-    return(H_modificada)
-  } else {
-    # La Hessiana ya es definida positiva, no necesita regularización
-    return(H)
-  }
-}
-
-#-------------------------------------------------------------------------------
-# Parámetros del algoritmo
-valor_inicial <- c(1.5, 0.5)# Definimos la función objetivo
-f <- function(x) {
-  return(0.5*(x[1]**2)  + 2.5*(x[2]**2) -2*x[1]*x[2]  - x[1]**3 )
-}
-
-#-------------------------------------------------------------------------------
-# Definimos el vector gradiente de la función
-gradiente_f <- function(x) {
-  dx <- x[1] - 2*x[2] - 3*x[1]**2
-  dy <- 5*x[2] - 2*x[1]
-  return(c(dx, dy))
-} 
-
-#-------------------------------------------------------------------------------
-# Definimos la matriz Hessiana de la función
-hessiana_f <- function(x) {
-  dxx <- 1 -6*x[1]
-  dxy <- -2
-  dyx <- -2
-  dyy <- 5
-  H <- matrix(c(dxx, dxy,
-                dyx, dyy ), nrow = 2, byrow = TRUE)
-  return(H)
-}
-
-#-------------------------------------------------------------------------------
-# Definimos la matriz Hessiana regularizada de la función
 hessiana_R <- function(x, delta = 1) {
   #llamamos a la hesiana normal
   H <- hessiana_f(x)
@@ -93,13 +36,16 @@ hessiana_R <- function(x, delta = 1) {
   #Evitamos que sea exponencial
   c <- pmax(descomposicion$values, delta) 
   
+  I <- diag(nrow(H))
+  
   # Reconstruir la matriz regularizada
-  H_reg <- H - c
+  H_reg <- H - c * I
   return(H_reg)
 }
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
+
 # Parámetros del algoritmo
 valor_inicial <- c(1.5, 0.5)
 tol <- 1e-6
@@ -257,6 +203,36 @@ points(historial_x_R[i], historial_y_R[i], pch = 19, col = "blue", cex = 2)
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
+
+a_precicion <- (resultado$beta[1]-beta0[1]) / beta0[1]
+landa_precicion <- (beta0[2]-resultado$beta[2]) / beta0[2]
+w_precicion <- (resultado$beta[3]-beta0[3]) / beta0[3]
+teta_precicion <- (resultado$beta[4]-beta0[4]) / beta0[4]
+
+#cat(a_precicion,"/ /",landa_precicion,"/ /",w_precicion,"/ /",teta_precicion)
+
+a_precicion <- a_precicion*(100)
+landa_precicion <- landa_precicion*(100)
+w_precicion <- w_precicion*(100)
+teta_precicion <- teta_precicion*(100)
+
+cat("Precicion de A ",a_precicion,"%")
+cat("Precicion de Landa ",landa_precicion,"%")
+cat("Precioin de Omega ",w_precicion,"%")
+cat("Precicionj de Phi",teta_precicion,"%")
+
+a_precicion <- a_precicion*(0.25)
+landa_precicion <- landa_precicion*(0.25)
+w_precicion <- w_precicion*(0.25)
+teta_precicion <- teta_precicion*(0.25)
+
+precicion_total <- 100 - (a_precicion+landa_precicion+w_precicion+teta_precicion)
+
+cat("Porcentaje de la precicion general del programa ",precicion_total,"%")
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
 # Resultados
 cat("\n=== RESULTADOS ===\n")
 cat("\nHessiana Normal:\n")

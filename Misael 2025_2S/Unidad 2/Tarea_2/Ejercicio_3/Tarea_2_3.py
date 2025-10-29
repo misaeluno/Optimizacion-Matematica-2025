@@ -124,10 +124,11 @@ def BFGS(x_inicial):
 x_inicial_1 = np.array([0,0])
 x_inicial_2 = np.array([-1,3])
 x_inicial_3 = np.array([4,-2])
+x_inicial_4 = np.array([5,5])
 #---------------------------------------------------------------------------------------------------
 
-x_optimo = [None] * 3
-trayectoria = [None] * 3
+x_optimo = [None] * 4
+trayectoria = [None] * 4
 #---------------------------------------------------------------------------------------------------
 
 # Ejecutar BFGS desde cada punto inicial
@@ -138,9 +139,14 @@ resultados.append((opt1, tray1))
 
 opt2, tray2 = BFGS(x_inicial_2)
 resultados.append((opt2, tray2))
+#---------------------------------------------------------------------------------------------------
 
 opt3, tray3 = BFGS(x_inicial_3)
 resultados.append((opt3, tray3))
+#---------------------------------------------------------------------------------------------------
+
+opt4, tray4 = BFGS(x_inicial_4)
+resultados.append((opt4, tray4))
 #---------------------------------------------------------------------------------------------------
 
 for i, (x_opt, tray) in enumerate(resultados, 1):
@@ -171,7 +177,7 @@ trayectoria_array = np.array(trayectoria)
 ax1 = fig.add_subplot(121, projection='3d')
 ax1.plot_surface(X, Y, Z, alpha=0.4, cmap='viridis')
 
-colores = ['red', 'blue', 'green']
+colores = ['red', 'blue', 'green','black']
 for i, (x_opt, tray) in enumerate(resultados):
     tray_array = np.array(tray)
 
@@ -180,6 +186,7 @@ for i, (x_opt, tray) in enumerate(resultados):
     ax1.plot(tray_array[:, 0], tray_array[:, 1], z_tray, 
          '.-', color=colores[i], linewidth=2, markersize=6, 
          label=f'Trayectoria {i+1}')
+    
 
 ax1.set_xlabel('x')
 ax1.set_ylabel('y')
@@ -194,7 +201,7 @@ ax2 = fig.add_subplot(122)
 contour = ax2.contour(X, Y, Z, levels=30, cmap='viridis')
 ax2.clabel(contour, inline=True, fontsize=8)
 
-puntos_iniciales = [x_inicial_1, x_inicial_2, x_inicial_3 ]
+puntos_iniciales = [x_inicial_1, x_inicial_2, x_inicial_3, x_inicial_4]
 for i, (x_opt, tray) in enumerate(resultados):
     tray_array = np.array(tray)
 

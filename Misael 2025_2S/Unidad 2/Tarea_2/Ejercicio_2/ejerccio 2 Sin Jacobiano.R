@@ -189,16 +189,16 @@ beta0 <- c(4.5, 0.3, 6.0, 0.5)
 resultado <- newton(beta0, t_data, y_data)
 #-----------------------------------------------------------------------
 # VISUALIZACIÓN DE RESULTADOS
-par(mfrow = c(2, 2))
+par(mfrow = c(1, 2))
 
 # 1. Grafico 1
 plot(t_data, y_data, pch = 20, col = "blue", cex = 1.2,
      xlab = "Dato t", ylab = "Dato Y", 
-     main = "Grafico de dispercion sin Jacobiano")
+     main = "Grafico de dispercion datos reales")
 t_plot <- seq(min(t_data), max(t_data), length.out = 200)
 
-y_ajustado <- modelo(resultado$beta[1], resultado$beta[2], 
-                     resultado$beta[3], resultado$beta[4], t_plot)
+y_ajustado <- modelo(beta0[1], beta0[2], 
+                     beta0[3], beta0[4], t_plot)
 
 lines(t_plot, y_ajustado, col = "red", lwd = 2)
 
@@ -209,118 +209,22 @@ grid()
 #--------------------
 #-----------------------------------------------------------------------
 
-# 2. Grafico 2 curva de nivel A y landa
+# 1. Grafico 1
+plot(t_data, y_data, pch = 20, col = "blue", cex = 1.2,
+     xlab = "Dato t", ylab = "Dato Y", 
+     main = "Grafico de dispercion datos optenidos")
+t_plot <- seq(min(t_data), max(t_data), length.out = 200)
 
-# Crear rangos alrededor de los valores óptimos
-A_seq <- seq(resultado$beta[1] - 1.5, resultado$beta[1] + 1.5, length.out = 60)
+y_ajustado <- modelo(resultado$beta[1], resultado$beta[2], 
+                    resultado$beta[3], resultado$beta[4], t_plot)
 
-landa_seq <- seq(min(0.01, resultado$beta[2] - 0.15), 
-                 resultado$beta[2] + 0.15, length.out = 60)
+lines(t_plot, y_ajustado, col = "red", lwd = 2)
 
-# Fijar w y teta en sus valores óptimos
-w_fijo <- resultado$beta[3]
-teta_fijo <- resultado$beta[4]
-
-# Calcular función objetivo para cada combinación de A y landa
-Z_A_landa <- matrix(NA, nrow = length(A_seq), ncol = length(landa_seq))
-
-# Para cada combinación (A, landa), calcular el error
-for(i in 1:length(A_seq)) {
-  for(j in 1:length(landa_seq)) {
-    beta_temp <- c(A_seq[i], landa_seq[j], w_fijo, teta_fijo)
-    Z_A_landa[i, j] <- funcion_Objetivo(beta_temp, t_data, y_data)
-  }
-}
-
-# Graficar curvas de nivel
-contour(A_seq, landa_seq, Z_A_landa, 
-        nlevels = 25, 
-        col = "lightblue",
-        xlab = "A", 
-        ylab = "Landa",
-        main = "A vs Landa, Sin jacobiano")
-
-# trayectoria
-if(!is.null(resultado$historial)) {
-  lines(resultado$historial[, "A"], 
-        resultado$historial[, "landa"], 
-        col = "red", lwd = 2, type = "b", pch = 20, cex = 0.8)
-  
-  # Punto inicial
-  points(beta0[1], beta0[2], pch = 19, col = "green", cex = 2.5)
-  
-  # Punto final
-  points(resultado$beta[1], resultado$beta[2], pch = 19, col = "blue", cex = 2.5)
-  
-  # Valor verdadero
-  points(A_real, landa_real, pch = 4, col = "black", cex = 1.5, lwd = 3)
-}
-legend("topright", 
-       legend = c("Inicio", "Trayectoria", "Final", "Valor real"),
-       col = c("green", "red", "blue", "black"),
-       pch = c(19, 20, 19, 4),
-       lwd = c(1, 2, 1, 3),
-       cex = 0.7)
 grid()
 
 #--------------------
 #-----------------------------------------------------------------------
-# 2. Grafico 2 curva de nivel A y landa
 
-# Crear rangos alrededor de los valores óptimos
-w_seq <- seq(resultado$beta[3] - 1.5, resultado$beta[3] + 1.5, length.out = 60)
-
-teta_seq <- seq(resultado$beta[4] - 0.8, resultado$beta[4] + 0.8, length.out = 60)
-
-# Fijar A y landa en sus valores óptimos
-A_fijo <- resultado$beta[1]
-landa_fijo <- resultado$beta[2]
-
-# Calcular función objetivo para cada combinación de W y Teta
-Z_w_teta <- matrix(NA, nrow = length(w_seq), ncol = length(teta_seq))
-
-# Para cada combinación (W, Teta), calcular el error
-for(i in 1:length(w_seq)) {
-  for(j in 1:length(teta_seq)) {
-    beta_temp <- c(A_fijo, landa_fijo, w_seq[i], teta_seq[j])
-    Z_w_teta[i, j] <- funcion_Objetivo(beta_temp, t_data, y_data)
-  }
-}
-
-# Graficar curvas de nivel
-contour(w_seq, teta_seq, Z_w_teta, 
-        nlevels = 25, 
-        col = "lightblue",
-        xlab = "Omega", 
-        ylab = "Phi",
-        main = "Omega vs Phi, Sin jacobiano")
-
-# trayectoria
-if(!is.null(resultado$historial)) {
-  lines(resultado$historial[, "w"], 
-        resultado$historial[, "teta"], 
-        col = "red", lwd = 2, type = "b", pch = 20, cex = 0.8)
-  
-  # Punto inicial
-  points(beta0[3], beta0[4], pch = 19, col = "green", cex = 2.5)
- 
-   # Punto final
-  points(resultado$beta[3], resultado$beta[4], pch = 19, col = "blue", cex = 2.5)
-  
-  # Valor verdadero
-  points(w_real, teta_real, pch = 4, col = "purple", cex = 1.5, lwd = 3)
-}
-
-legend("topright", 
-       legend = c("Inicio", "Trayectoria", "Final", "Valor real"),
-       col = c("green", "red", "blue", "purple"),
-       pch = c(19, 20, 19, 4),
-       lwd = c(1, 2, 1, 3),
-       cex = 0.7)
-grid()
-# Crear rangos alrededor de los valores óptimos
-#--------------------
-#-----------------------------------------------------------------------
 
 cat("\n=== RESULTADOS Sin JACOBIANO===\n")
 cat("A obtenido     =",resultado$beta[1],"   y A buscado    =",A_real,"\n")
