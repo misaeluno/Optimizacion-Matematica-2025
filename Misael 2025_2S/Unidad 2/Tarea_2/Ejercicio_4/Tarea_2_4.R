@@ -83,14 +83,18 @@ hessiana_f <- function(x) {
 #-------------------------------------------------------------------------------
 # Definimos la matriz Hessiana regularizada de la función
 hessiana_R <- function(x, delta = 1) {
+  #llamamos a la hesiana normal
   H <- hessiana_f(x)
+  #conseguimos los numeros de !!!VALORES PROPIOS!!!
   descomposicion <- eigen(H)
   
   # Ahora 'delta' está definido dentro del alcance de la función
-  valores_propios_reg <- pmax(descomposicion$values, delta) 
+  #C = Buscame el valor maximo de(DESCOMPOSICION y DEALTA)   
+  #Evitamos que sea exponencial
+  c <- pmax(descomposicion$values, delta) 
   
   # Reconstruir la matriz regularizada
-  H_reg <- H - valores_propios_reg
+  H_reg <- H - c
   return(H_reg)
 }
 

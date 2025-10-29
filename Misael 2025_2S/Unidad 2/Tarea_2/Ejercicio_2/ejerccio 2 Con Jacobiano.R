@@ -188,25 +188,22 @@ y_data <- c(3.30604951, 1.63304262, -2.46669298, -4.67216227,
             1.18712468)
 #-------------------------------------------------------------------------------
 
+#-----------------------------------------------------------------------
 #PRUEBA
-y_data <- modelo(5, 0.2, 2*pi, pi/4, t_data) + rnorm(50, 0, 0.2)
-#-------------------------------------------------------------------------------
-
-# Valores iniciales c(A, Landa, W, Teta)
+#y_data <- modelo(5, 0.2, 2*pi, pi/4, t_data) + rnorm(50, 0, 0.2)
+#-----------------------------------------------------------------------
+# Valores iniciales
 beta0 <- c(4.5, 0.3, 6.0, 0.5)
-#-------------------------------------------------------------------------------
-
 # Ejecutar método de Newton
 resultado <- newton(beta0, t_data, y_data)
-
-#-------------------------------------------------------------------------------
+#-----------------------------------------------------------------------
 # VISUALIZACIÓN DE RESULTADOS
 par(mfrow = c(2, 2))
 
-# 1. Ajuste del modelo
+# 1. Grafico 1
 plot(t_data, y_data, pch = 20, col = "blue", cex = 1.2,
-     xlab = "Tiempo (t)", ylab = "Señal (y)", 
-     main = "Ajuste del Modelo de Oscilación Amortiguada")
+     xlab = "Dato t", ylab = "Dato Y", 
+     main = "Grafico de dispercion")
 t_plot <- seq(min(t_data), max(t_data), length.out = 200)
 
 y_ajustado <- modelo(resultado$beta[1], resultado$beta[2], 
@@ -217,55 +214,124 @@ lines(t_plot, y_ajustado, col = "red", lwd = 2)
 #legend("topright", legend = c("Datos experimentales", "Modelo ajustado"), 
 #       col = c("blue", "red"), pch = c(20, NA), lty = c(NA, 1), lwd = c(1, 2))
 grid()
-#-------------------------------------------------------------------------------
 
-# 2. Residuos
-y_pred_final <- modelo(resultado$beta[1], resultado$beta[2], 
-                       resultado$beta[3], resultado$beta[4], t_data)
+#--------------------
+#-----------------------------------------------------------------------
 
-residuos <- y_data - y_pred_final
+# 2. Grafico 2 curva de nivel A y landa
 
-plot(t_data, residuos, pch = 20, col = "darkgreen",
-     xlab = "Tiempo (t)", ylab = "Residuos", 
-     main = "Análisis de Residuos")
+# Crear rangos alrededor de los valores óptimos
+A_seq <- seq(resultado$beta[1] - 1.5, resultado$beta[1] + 1.5, length.out = 60)
 
-abline(h = 0, col = "red", lty = 2, lwd = 2)
+landa_seq <- seq(min(0.01, resultado$beta[2] - 0.15), 
+                 resultado$beta[2] + 0.15, length.out = 60)
 
+# Fijar w y teta en sus valores óptimos
+w_fijo <- resultado$beta[3]
+teta_fijo <- resultado$beta[4]
+
+# Calcular función objetivo para cada combinación de A y landa
+Z_A_landa <- matrix(NA, nrow = length(A_seq), ncol = length(landa_seq))
+
+# Para cada combinación (A, landa), calcular el error
+for(i in 1:length(A_seq)) {
+  for(j in 1:length(landa_seq)) {
+    beta_temp <- c(A_seq[i], landa_seq[j], w_fijo, teta_fijo)
+    Z_A_landa[i, j] <- funcion_Objetivo(beta_temp, t_data, y_data)
+  }
+}
+
+# Graficar curvas de nivel
+contour(A_seq, landa_seq, Z_A_landa, 
+        nlevels = 25, 
+        col = "lightblue",
+        xlab = "A", 
+        ylab = "Landa",
+        main = "A vs Landa, Con Jacobiano")
+
+# trayectoria
+if(!is.null(resultado$historial)) {
+  lines(resultado$historial[, "A"], 
+        resultado$historial[, "landa"], 
+        col = "red", lwd = 2, type = "b", pch = 20, cex = 0.8)
+  
+  # Punto inicial
+  points(beta0[1], beta0[2], pch = 19, col = "green", cex = 2.5)
+  
+  # Punto final
+  points(resultado$beta[1], resultado$beta[2], pch = 19, col = "blue", cex = 2.5)
+  
+  # Valor verdadero
+  points(A_real, landa_real, pch = 4, col = "black", cex = 1.5, lwd = 3)
+}
+legend("topright", 
+       legend = c("Inicio", "Trayectoria", "Final", "Valor real"),
+       col = c("green", "red", "blue", "black"),
+       pch = c(19, 20, 19, 4),
+       lwd = c(1, 2, 1, 3),
+       cex = 0.7)
 grid()
-#-------------------------------------------------------------------------------
 
-# 3. Convergencia de parámetros
-hist <- resultado$historial
-iter_seq <- hist[, "iter"]
+#--------------------
+#-----------------------------------------------------------------------
+# 3. Grafico 3 curva de nivel W y teta
 
-plot(iter_seq, hist[, "A"], type = "b", col = "black", pch = 16,
-     xlab = "Iteración", ylab = "Valor del parámetro",
-     main = "Convergencia de Parámetros", 
-     ylim = range(hist[, 2:5], na.rm = TRUE))
+# Crear rangos alrededor de los valores óptimos
+w_seq <- seq(resultado$beta[3] - 1.5, resultado$beta[3] + 1.5, length.out = 60)
 
-lines(iter_seq, hist[, "landa"], type = "b", col = "red", pch = 16)
+teta_seq <- seq(resultado$beta[4] - 0.8, resultado$beta[4] + 0.8, length.out = 60)
 
-lines(iter_seq, hist[, "w"], type = "b", col = "green", pch = 16)
+# Fijar A y landa en sus valores óptimos
+A_fijo <- resultado$beta[1]
+landa_fijo <- resultado$beta[2]
 
-lines(iter_seq, hist[, "teta"], type = "b", col = "blue", pch = 16)
+# Calcular función objetivo para cada combinación de W y Teta
+Z_w_teta <- matrix(NA, nrow = length(w_seq), ncol = length(teta_seq))
 
-#legend("right", legend = c("A", "landa", "W", "teta"),col = 1:4, 
-#       lty = 1, pch = 16, cex = 1)
+# Para cada combinación (W, Teta), calcular el error
+for(i in 1:length(w_seq)) {
+  for(j in 1:length(teta_seq)) {
+    beta_temp <- c(A_fijo, landa_fijo, w_seq[i], teta_seq[j])
+    Z_w_teta[i, j] <- funcion_Objetivo(beta_temp, t_data, y_data)
+  }
+}
+
+# Graficar curvas de nivel
+contour(w_seq, teta_seq, Z_w_teta, 
+        nlevels = 25, 
+        col = "lightblue",
+        xlab = "Omega", 
+        ylab = "Phi",
+        main = "Omega vs Phi, Con Jacobiano")
+
+# trayectoria
+if(!is.null(resultado$historial)) {
+  lines(resultado$historial[, "w"], 
+        resultado$historial[, "teta"], 
+        col = "red", lwd = 2, type = "b", pch = 20, cex = 0.8)
+  
+  # Punto inicial
+  points(beta0[3], beta0[4], pch = 19, col = "green", cex = 2.5)
+  
+  # Punto final
+  points(resultado$beta[3], resultado$beta[4], pch = 19, col = "blue", cex = 2.5)
+  
+  # Valor verdadero
+  points(w_real, teta_real, pch = 4, col = "purple", cex = 1.5, lwd = 3)
+}
+
+legend("topright", 
+       legend = c("Inicio", "Trayectoria", "Final", "Valor real"),
+       col = c("green", "red", "blue", "purple"),
+       pch = c(19, 20, 19, 4),
+       lwd = c(1, 2, 1, 3),
+       cex = 0.7)
 grid()
+# Crear rangos alrededor de los valores óptimos
+#--------------------
+#-----------------------------------------------------------------------
 
-#-------------------------------------------------------------------------------
-# 4. Histograma de residuos
-hist(residuos, breaks = 15, col = "lightblue", border = "black",
-     xlab = "Residuos", main = "Distribución de Residuos")
-abline(v = 0, col = "red", lwd = 2, lty = 2)
-grid()
-#-------------------------------------------------------------------------------
-
-# Estadísticas adicionales
-cat("\n=== ESTADÍSTICAS ADICIONALES ===\n")
-cat("Error cuadrático medio (MSE):", mean(residuos^2), "\n")
-cat("Raíz del error cuadrático medio (RMSE):", sqrt(mean(residuos^2)), "\n")
-cat("Desviación estándar de residuos:", sd(residuos), "\n")
+cat("\n=== RESULTADOS Con JACOBIANO===\n")
 cat("A obtenido     =",resultado$beta[1],"   y A buscado    =",A_real,"\n")
 cat("Landa obtenido =",resultado$beta[2],"   y Landa buscad =",landa_real,"\n")
 cat("W obtenido     =",resultado$beta[3],"  y W buscado    =",w_real,"\n")
