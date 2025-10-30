@@ -225,11 +225,60 @@ grid()
 #--------------------
 #-----------------------------------------------------------------------
 
+precicion_a <-abs((A_real - abs(resultado$beta[1])))
+# error dividio en real
+precicion_a <- mean(precicion_a / A_real)
+
+precicion_a <- precicion_a * 100
+# 100% menos porcentaje ERROR
+precicion_a <- 100 - precicion_a
+#cat(precicion_a)
+
+
+precicion_landa <-abs((landa_real - abs(resultado$beta[2])))
+# error dividio en real
+precicion_landa <- mean(precicion_landa / landa_real)
+
+precicion_landa <- precicion_landa * 100
+# 100% menos porcentaje ERROR
+precicion_landa <- 100 - precicion_landa
+#cat(precicion_landa)
+
+
+precicion_w <-abs((w_real - abs(resultado$beta[3])))
+# error dividio en real
+precicion_w <- mean(precicion_w / w_real)
+
+precicion_w <- precicion_w * 100
+# 100% menos porcentaje ERROR
+precicion_w <- 100 - precicion_w
+#cat(precicion_w)
+
+
+precicion_teta <-abs((teta_real - abs(resultado$beta[4])))
+# error dividio en real
+precicion_teta <- mean(precicion_teta / teta_real)
+
+precicion_teta <- precicion_teta * 100
+# 100% menos porcentaje ERROR
+precicion_teta <- 100 - precicion_teta
+#cat(precicion_teta)
+
+precicion_total <- mean(precicion_a,precicion_landa,precicion_teta,precicion_w)
+#cat(precicion_total)
+#--------------------
+#-----------------------------------------------------------------------
+
 
 cat("\n=== RESULTADOS Sin JACOBIANO===\n")
 cat("A obtenido     =",resultado$beta[1],"   y A buscado    =",A_real,"\n")
+cat("Su precicion es =",precicion_a,"\n")
 cat("Landa obtenido =",resultado$beta[2],"   y Landa buscad =",landa_real,"\n")
+cat("Su precicion es =",precicion_landa,"\n")
 cat("W obtenido     =",resultado$beta[3],"  y W buscado    =",w_real,"\n")
+cat("Su precicion es =",precicion_w,"\n")
 cat("teta obtenido  =",resultado$beta[4],"   y teta buscado =",teta_real,"\n")
+cat("Su precicion es =",precicion_teta,"\n")
 cat("Iteraciones necesarias = ",resultado$iteraciones,"\n")
 cat("Valor de la Funcion(β) =", resultado$valor_f, "\n")
+cat("La precicion del progra es =",precicion_total)

@@ -53,6 +53,8 @@ max_inter <- 10000  # Aumentamos las iteraciones por si acaso, aunque no sean ne
 iteraciones <- 0
 iteraciones_r <- 0
 
+
+Puntos_minimos_a_buscar <- c(0.06666666,0.02666666)
 #-------------------------------------------------------------------------------
 # Bucle del método de Newton
 x_k_h <- valor_inicial
@@ -95,7 +97,7 @@ for (i in 1:max_inter) {
   #-----------------------------------------------------------------------------
   # Criterios de parada
   if (all(abs(gradiente_f(x_k1_r)) < tol) || all(abs(x_k1_r - x_k_r) < tol)) {
-    cat("Hessiana regularizada paró en iteración:", iteraciones_r, "\n")
+    #cat("Hessiana regularizada paró en iteración:", iteraciones_r, "\n")
     
     # Guardar punto final
     historial_x_R <- c(historial_x_R, x_k1_r[1])
@@ -127,7 +129,7 @@ for (i in 1:max_inter) {
   
   # Criterios de parada
   if (all(abs(gradiente_f(x_k1_h)) < tol) || all(abs(x_k1_h - x_k_h) < tol)) {
-    cat("paramos en iteracion = ",iteraciones)
+    #cat("paramos en iteracion = ",iteraciones)
     break
   }
   
@@ -204,32 +206,37 @@ points(historial_x_R[i], historial_y_R[i], pch = 19, col = "blue", cex = 2)
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
-a_precicion <- (resultado$beta[1]-beta0[1]) / beta0[1]
-landa_precicion <- (beta0[2]-resultado$beta[2]) / beta0[2]
-w_precicion <- (resultado$beta[3]-beta0[3]) / beta0[3]
-teta_precicion <- (resultado$beta[4]-beta0[4]) / beta0[4]
+#Buscar la precicion del programa
 
-#cat(a_precicion,"/ /",landa_precicion,"/ /",w_precicion,"/ /",teta_precicion)
+# Valor real - optenido HESSIANA NORMAL
+precicion_x_n <-abs((abs(Puntos_minimos_a_buscar[1]) - abs(historial_x_H)))
+# error dividio en real
+precicion_x_n <- mean(precicion_x_n / Puntos_minimos_a_buscar[1])
+# 100% menos porcentaje ERROR
+precicion_x_n <- 100 - precicion_x_n
 
-a_precicion <- a_precicion*(100)
-landa_precicion <- landa_precicion*(100)
-w_precicion <- w_precicion*(100)
-teta_precicion <- teta_precicion*(100)
+# Valor real - optenido
+precicion_y_n <-abs((abs(Puntos_minimos_a_buscar[2]) - abs(historial_y_H)))
+# error dividio en real
+precicion_y_n <- mean(precicion_y_n / Puntos_minimos_a_buscar[2])
+# 100% menos porcentaje ERROR
+precicion_y_n <- 100 - precicion_y_n
 
-cat("Precicion de A ",a_precicion,"%")
-cat("Precicion de Landa ",landa_precicion,"%")
-cat("Precioin de Omega ",w_precicion,"%")
-cat("Precicionj de Phi",teta_precicion,"%")
+#-------------------------------------------------------------------------------
 
-a_precicion <- a_precicion*(0.25)
-landa_precicion <- landa_precicion*(0.25)
-w_precicion <- w_precicion*(0.25)
-teta_precicion <- teta_precicion*(0.25)
+# Valor real - optenido HESSIANA REGULARIZADO
+precicion_x_r <-abs((abs(Puntos_minimos_a_buscar[1]) - abs(historial_x_R)))
+# error dividio en real
+precicion_x_r <- mean(precicion_x_r / Puntos_minimos_a_buscar[1])
+# 100% menos porcentaje ERROR
+precicion_x_r <- 100 - precicion_x_r
 
-precicion_total <- 100 - (a_precicion+landa_precicion+w_precicion+teta_precicion)
-
-cat("Porcentaje de la precicion general del programa ",precicion_total,"%")
-
+# Valor real - optenido
+precicion_y_r <-abs((abs(Puntos_minimos_a_buscar[2]) - abs(historial_y_R)))
+# error dividio en real
+precicion_y_r <- mean(precicion_y_r / Puntos_minimos_a_buscar[2])
+# 100% menos porcentaje ERROR
+precicion_y_r <- 100 - precicion_y_r
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
@@ -238,11 +245,15 @@ cat("\n=== RESULTADOS ===\n")
 cat("\nHessiana Normal:\n")
 cat("  Iteraciones:", iteraciones, "\n")
 cat("  Mínimo encontrado en x:", x_k_h[1], "\n")
+cat("  Precicio del valor X = ",precicion_x_n,"\n")
 cat("  Mínimo encontrado en y:", x_k_h[2], "\n")
+cat("  Precicion del valor Y = ",precicion_y_n,"\n")
 cat("  Valor de la función:", f(x_k_h), "\n")
 
 cat("\nHessiana Regularizada:\n")
 cat("  Iteraciones:", iteraciones_r, "\n")
 cat("  Mínimo encontrado en x:", x_k_r[1], "\n")
+cat("  Precicion del valor X = ",precicion_x_r, "\n")
 cat("  Mínimo encontrado en y:", x_k_r[2], "\n")
+cat("  Precicion del valor Y = ",precicion_y_r, "\n")
 cat("  Valor de la función:", f(x_k_r), "\n")
