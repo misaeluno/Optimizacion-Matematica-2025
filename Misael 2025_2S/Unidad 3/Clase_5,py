@@ -1,0 +1,62 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import minimize
+
+#generar 
+np.random
+
+m=500
+
+#generar los correos no-sam (clase 0)
+X_no_spam= np.random.randn(250, 2) + [2, 2]
+y_no_spam= np.zeros(250)
+
+#ggemerar los correo spam (clase 1)
+X_spam = np.random.randn(250,2) + [4, 4]
+y_spam = np.ones(250)
+
+#cocatenar losn datos+
+X_bruto = np.vstack((X_no_spam, X_spam))
+y = np.hstack((y_no_spam, y_spam))
+
+
+
+#añadir un sesgo (intersepto)
+X = np.column_stack((np.ones(m), X_bruto))
+
+print(X)
+
+# definir funcion necesarias
+def sigmoide(z):
+    return 1 / (1+np.exp(-z))
+
+def funcion_objetivo(beta, X, y):
+    m = len(y)
+    h = sigmoide(np.dot(X, beta))
+    log_ver_neg = -(1/m) * np.sum(y * np.log(h) + (1-y) * np.log(1-h))
+    return log_ver_neg
+
+#parametros inicales
+beta_inical = np.zeros(X.shape[1])
+
+#ejecucion
+resultado = minimize(fun = funcion_objetivo,
+                     x0 = beta_inical,
+                     args = (X,y),
+                     method = "BFGS")
+
+beta_optimo= resultado.x
+print(resultado)
+
+#visializar los datos
+fig, ax = plt.subplots(figsize = (10, 6))
+
+ax.scatter(X_bruto[y==0][:, 0], X_bruto[y==0][:, 1], color ="blue", label="no-spam")
+ax.scatter(X_bruto[y==1][:, 0], X_bruto[y==1][:, 1], color ="red", label="spam")
+
+x1_valores = np.linspace(0,6,100)
+x2_valores = -(beta_optimo[0]+ beta_optimo[1] * x1_valores /beta_optimo[2])
+
+ax.set_xlabel("caracteristicas 1 (frecuencias palabra clave)")
+ax.set_ylabel("caracteristica 2 (cantidad de enlaces)")
+plt.show()
