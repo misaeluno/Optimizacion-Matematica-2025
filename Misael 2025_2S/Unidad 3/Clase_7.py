@@ -48,3 +48,28 @@ ruta_inicial = np.arange(n_puntos) # [0, 1, 2, ..., 24]
 np.random.shuffle(ruta_inicial)
 distancia_inicial = distancia_total(ruta_inicial, puntos)
 print(f"Distancia (aleatoria): {distancia_inicial:.2f}")
+
+
+def simulated_anneling(coordenadas, t_inicial = 1000, t_final = 1e-6, alpha = 0.999 ):
+    n = len(coordenadas)
+    r_actual = np.arange(n)
+    np.random.shuffle(r_actual)
+    f_actual = distancia_total(r_actual, coordenadas)
+    r_mejor = r_actual.copy()
+    f_mejor = f_actual
+    temperatura = t_inicial
+    iteraciones = 0
+    while temperatura > t_final :
+        r_nuevo = r_actual.copy()
+        i, j = np.random.choice(r_nuevo, size = 2, replace = False)
+        r_nuevo[i], r_nuevo[j] = r_nuevo[j], r_nuevo[i]
+        f_nuevo = distancia_total(r_nuevo, coordenadas)
+        delta = f_nuevo - f_actual
+        if delta < 0 :
+            r_actual = r_nuevo
+            f_actual = f_nuevo
+            if f_actual < f_mejor :
+                r_mejor = r_actual.copy()
+                f_mejor = f_actual
+        else :
+            
