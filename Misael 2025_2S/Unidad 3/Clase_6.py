@@ -48,37 +48,3 @@ ruta_inicial = np.arange(n_puntos) # [0, 1, 2, ..., 24]
 np.random.shuffle(ruta_inicial)
 distancia_inicial = distancia_total(ruta_inicial, puntos)
 print(f"Distancia (aleatoria): {distancia_inicial:.2f}")
-
-
-punto_x = np.array(puntos[:,0])
-punto_y = np.array(puntos[:,1]) 
-print(punto_x)
-print(punto_y)
-
-i = 1
-j = 0
-for j in range(j,n_puntos):
-    D_s = 100
-    for i in range(i,n_puntos):
-        D_x = punto_x[i] - punto_x[j]
-        D_x = D_x*D_x
-        #print(D_x)
-        D_y = punto_y[i] - punto_y[j]
-        D_y = D_y*D_y
-        #print(D_y)
-        D = D_x + D_y
-        D = D**(1/2)
-        print(D)
-        if D<D_s :
-            D_s = D
-
-    Linea_x=[punto_x[j],punto_x[i]]
-    Linea_y=[punto_y[j],punto_y[i]]
-    fig, ax2 = plt.subplots(figsize = (8, 8))
-    ax2.scatter(puntos[:, 0], puntos[:, 1], color = "red", marker = "o")
-    ax2.plot(Linea_x,Linea_y, color="red")
-    ax2.set_title("Distribución de puntos de soldadura en la PCB")
-    ax2.set_xlabel("X")
-    ax2.set_ylabel("Y")
-    plt.grid(True, alpha = 0.25)
-    plt.show()
