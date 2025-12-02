@@ -72,4 +72,37 @@ def simulated_anneling(coordenadas, t_inicial = 1000, t_final = 1e-6, alpha = 0.
                 r_mejor = r_actual.copy()
                 f_mejor = f_actual
         else :
-            
+            probabilidad = np.exp(-delta / temperatura)
+            if np.random.rand() < probabilidad:
+                r_actual = r_nuevo
+                f_actual = f_nuevo
+        temperatura = alpha * temperatura
+        iteraciones = iteraciones + 1 
+    return r_mejor, f_mejor, iteraciones
+
+#ejecicion delñ algoritmo
+
+mejor_ruta, mejor_distancia, iter = simulated_anneling(puntos)
+print("mejor distancia encontrada: ",mejor_distancia)
+print("Iteraciones: ", iter)
+
+x_ordenado = puntos[mejor_ruta, 0]
+y_ordenado = puntos[mejor_ruta, 1]
+
+x_plot = np.append(x_ordenado, x_ordenado[0])
+y_plot = np.append(y_ordenado, y_ordenado[0])
+
+fig, ax = plt.subplots(figsize = (5,5))
+ax.plot(x_plot, y_plot, color = "red", marker = "o", mfc = "red")
+ax.plot(x_ordenado[0], y_ordenado[0], color = "green", marker = "o", label = "inicio")
+
+for i in range(len(mejor_ruta)):
+    ax.text(x_ordenado[i] + 1, y_ordenado[i] + 1, i + 1,
+            color = "darkblue", fontweight = "bold")
+    
+ax.set_title("distribuciioon de puntos de soldadura en la PCB")
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+ax.legend()
+plt.grid(True, alpha = 0.25)
+plt.show()
