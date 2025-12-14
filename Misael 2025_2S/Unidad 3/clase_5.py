@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
-
+#que pasa mario hugo que no se guarda tipo .py
 #generar 
 np.random
 
@@ -18,8 +18,6 @@ y_spam = np.ones(250)
 #cocatenar losn datos+
 X_bruto = np.vstack((X_no_spam, X_spam))
 y = np.hstack((y_no_spam, y_spam))
-
-
 
 #añadir un sesgo (intersepto)
 X = np.column_stack((np.ones(m), X_bruto))

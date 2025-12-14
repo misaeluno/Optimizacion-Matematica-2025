@@ -1,0 +1,100 @@
+# Cargar librerías necesarias
+# ---------------------------
+import numpy as np
+import matplotlib.pyplot as plt
+# Configuraciones iniciales
+# -------------------------
+plt.rcParams["figure.dpi"]
+
+# Conjunto de datos (simulados)
+# -----------------------------
+np.random.seed(2025)
+# Parámetros del problema
+n_puntos = 25
+# Generación de coordenadas
+puntos = np.random.uniform(low = 0, high = 100, size = (n_puntos, 2))
+print("Primeros 5 puntos de soldadura:\n", puntos[:5])
+
+# Visualización inicial de los puntos
+fig, ax = plt.subplots(figsize = (5, 5))
+ax.scatter(puntos[:, 0], puntos[:, 1], color = "red", marker = "o")
+ax.set_title("Distribución de puntos de soldadura en la PCB")
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+plt.grid(True, alpha = 0.25)
+plt.show()
+
+# Definición del función objetivo
+# -------------------------------
+def distancia_total(ruta, coordenadas):
+    distancia = 0.0
+    n_puntos = len(ruta)
+    for i in range(n_puntos):
+        id_actual = ruta[i]
+        id_siguiente = ruta[(i + 1) % n_puntos]
+        p1 = coordenadas[id_actual]
+        p2 = coordenadas[id_siguiente]
+        d = np.sqrt(np.sum((p1 - p2) ** 2))
+        distancia = distancia + d
+    return distancia
+
+# Ejemplo: calcular distancia de una ruta aleatoria
+ruta_inicial = np.arange(n_puntos)
+np.random.shuffle(ruta_inicial)
+distancia_inicial = distancia_total(ruta_inicial, puntos)
+print("Distancia (aleatoria):", distancia_inicial)
+
+def simulated_annealing(coordenadas, t_inicial = 10000, t_final = 1e-6, alpha =0.999):
+    n = len(coordenadas)
+    r_actual = np.arange(n)
+    np.random.shuffle(r_actual)
+    f_actual = distancia_total(r_actual, coordenadas)
+    r_mejor = r_actual.copy()
+    f_mejor = f_actual
+    temperatura = t_inicial
+    iteraciones = 0
+    while temperatura > t_final:
+        r_nuevo = r_actual.copy()
+        i, j = np.random.choice(r_nuevo, size = 2, replace = False)
+        r_nuevo[i], r_nuevo[j] = r_nuevo[j], r_nuevo[i]
+        f_nuevo = distancia_total(r_nuevo, coordenadas)
+        delta = f_nuevo - f_actual
+        if delta < 0:
+            r_actual = r_nuevo
+            f_actual = f_nuevo
+            if f_actual < f_mejor:
+                r_mejor = r_actual.copy()
+                f_mejor = f_actual
+        else:
+            probabilidad = np.exp(-delta / temperatura)
+            if np.random.rand() < probabilidad:
+                r_actual = r_nuevo
+                f_actual = f_nuevo
+            temperatura = alpha * temperatura
+            iteraciones = iteraciones + 1
+    return r_mejor, f_mejor, iteraciones
+
+# Ejecución del algoritmo
+# -----------------------
+mejor_ruta, mejor_distancia, iter = simulated_annealing(puntos)
+print("Mejor distancia encontrada:", mejor_distancia)
+print("Iteraciones:", iter)
+
+x_ordenado = puntos[mejor_ruta, 0]
+y_ordenado = puntos[mejor_ruta, 1]
+x_plot = np.append(x_ordenado, x_ordenado[0])
+y_plot = np.append(y_ordenado, y_ordenado[0])
+fig, ax = plt.subplots(figsize = (5, 5))
+ax.plot(x_plot, y_plot, color = "blue", marker = "o", mfc = "red")
+ax.plot(x_ordenado[0], y_ordenado[0], color = "green", marker = "o", label ="Inicio")
+
+for i in range(len(mejor_ruta)):
+    ax.text(x_ordenado[i] + 1, y_ordenado[i] + 1, i + 1,
+    color = "darkblue", fontweight = "bold")
+
+ax.set_title("Distribución de puntos de soldadura en la PCB")
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+ax.legend()
+plt.grid(True, alpha = 0.25)
+plt.show()
