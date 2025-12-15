@@ -47,10 +47,10 @@ def menos_log_verosimilitud(parametros, tiempos):
 # Proceso de optimización
 # -----------------------
 parametros_inicial = np.array([0.0, 0.0]) # Corresponde a k = 1 y lambda = 1
-resultado = minimize(fun = menos_log_verosimilitud,
-x0 = parametros_inicial,
-args = (tiempos_falla),
+
+resultado = minimize(fun = menos_log_verosimilitud, x0 = parametros_inicial, args = (tiempos_falla),
 method = "Nelder-Mead")
+
 # Recuperar parámetros
 k_estimado = np.exp(resultado.x[0])
 lambda_estimado = np.exp(resultado.x[1])

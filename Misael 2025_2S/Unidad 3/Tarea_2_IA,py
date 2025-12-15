@@ -1,0 +1,331 @@
+# Análisis de Sensibilidad a Inicializaciones Aleatorias
+#--------------------------------------------------------
+import numpy as np
+import pandas as pd
+from scipy.optimize import minimize
+import matplotlib.pyplot as plt
+
+np.random.seed(2025)
+
+# ===================================================================
+# GENERAR DATOS
+# ===================================================================
+
+distancia = np.linspace(1, 20, 50)
+lectura_sensor = (50 / (distancia ** 1.5)) + 2 + np.random.normal(0, 0.5, 50)
+
+# ===================================================================
+# FUNCIONES DEL MODELO
+# ===================================================================
+
+def div(beta, distancia):
+    """Modelo: h(x) = β₀ / x^β₁ + β₂"""
+    x = np.array(distancia)
+    h = (beta[0] / x**beta[1]) + beta[2]
+    return h
+
+def F(beta, distancia, lectura_sensor):
+    """Función objetivo: Suma de errores cuadráticos"""
+    y = np.array(lectura_sensor)
+    x = np.array(distancia)
+    h = div(beta, x)
+    residuos = y - h
+    f_total = np.sum(residuos**2)
+    return f_total
+
+# ===================================================================
+# EXPERIMENTO: MÚLTIPLES INICIALIZACIONES
+# ===================================================================
+
+print("=" * 80)
+print("ANÁLISIS DE SENSIBILIDAD A INICIALIZACIONES ALEATORIAS")
+print("=" * 80)
+print()
+
+# Número de experimentos
+n_experimentos = 20
+
+# Listas para almacenar resultados
+resultados = []
+betas_optimos = []
+costos_finales = []
+exitos = []
+
+print(f"Ejecutando {n_experimentos} optimizaciones con diferentes puntos de partida...")
+print()
+
+# Rangos para generar inicializaciones aleatorias
+# β₀: amplitud (valores razonables entre 10 y 100)
+# β₁: exponente (valores razonables entre 0.5 y 3.0)
+# β₂: offset (valores razonables entre -5 y 10)
+
+for i in range(n_experimentos):
+    # Generar inicialización aleatoria
+    beta_inicial = np.array([
+        np.random.uniform(10, 100),    # β₀
+        np.random.uniform(0.5, 3.0),   # β₁
+        np.random.uniform(-5, 10)      # β₂
+    ])
+    
+    # Optimizar
+    resultado = minimize(
+        fun=F,
+        x0=beta_inicial,
+        args=(distancia, lectura_sensor),
+        method='BFGS',
+        options={'disp': False}  # No mostrar progreso individual
+    )
+    
+    # Guardar resultados
+    resultados.append({
+        'experimento': i + 1,
+        'beta0_inicial': beta_inicial[0],
+        'beta1_inicial': beta_inicial[1],
+        'beta2_inicial': beta_inicial[2],
+        'beta0_optimo': resultado.x[0],
+        'beta1_optimo': resultado.x[1],
+        'beta2_optimo': resultado.x[2],
+        'costo_final': resultado.fun,
+        'exito': resultado.success,
+        'n_iteraciones': resultado.nit,
+        'n_evaluaciones': resultado.nfev
+    })
+    
+    betas_optimos.append(resultado.x)
+    costos_finales.append(resultado.fun)
+    exitos.append(resultado.success)
+    
+    # Mostrar progreso cada 5 experimentos
+    if (i + 1) % 5 == 0:
+        print(f"  Completados {i + 1}/{n_experimentos} experimentos...")
+
+print("\n✓ Optimizaciones completadas!\n")
+
+# Convertir a DataFrame
+df_resultados = pd.DataFrame(resultados)
+
+# ===================================================================
+# ANÁLISIS DE RESULTADOS
+# ===================================================================
+
+print("=" * 80)
+print("RESUMEN DE RESULTADOS")
+print("=" * 80)
+print()
+
+# Tasa de éxito
+tasa_exito = (sum(exitos) / n_experimentos) * 100
+print(f"Tasa de convergencia exitosa: {tasa_exito:.1f}% ({sum(exitos)}/{n_experimentos})")
+print()
+
+# Estadísticas del costo final
+print("Estadísticas del costo final F(β*):")
+print(f"  • Mínimo:       {df_resultados['costo_final'].min():.6f}")
+print(f"  • Máximo:       {df_resultados['costo_final'].max():.6f}")
+print(f"  • Media:        {df_resultados['costo_final'].mean():.6f}")
+print(f"  • Desv. Est.:   {df_resultados['costo_final'].std():.6f}")
+print(f"  • Rango:        {df_resultados['costo_final'].max() - df_resultados['costo_final'].min():.6f}")
+print()
+
+# Mejor y peor solución
+idx_mejor = df_resultados['costo_final'].idxmin()
+idx_peor = df_resultados['costo_final'].idxmax()
+
+print("Mejor solución encontrada:")
+print(f"  • Experimento: {df_resultados.loc[idx_mejor, 'experimento']}")
+print(f"  • β₀ = {df_resultados.loc[idx_mejor, 'beta0_optimo']:.4f}")
+print(f"  • β₁ = {df_resultados.loc[idx_mejor, 'beta1_optimo']:.4f}")
+print(f"  • β₂ = {df_resultados.loc[idx_mejor, 'beta2_optimo']:.4f}")
+print(f"  • Costo final: {df_resultados.loc[idx_mejor, 'costo_final']:.6f}")
+print()
+
+print("Peor solución encontrada:")
+print(f"  • Experimento: {df_resultados.loc[idx_peor, 'experimento']}")
+print(f"  • β₀ = {df_resultados.loc[idx_peor, 'beta0_optimo']:.4f}")
+print(f"  • β₁ = {df_resultados.loc[idx_peor, 'beta1_optimo']:.4f}")
+print(f"  • β₂ = {df_resultados.loc[idx_peor, 'beta2_optimo']:.4f}")
+print(f"  • Costo final: {df_resultados.loc[idx_peor, 'costo_final']:.6f}")
+print()
+
+# Variabilidad de los parámetros
+print("Variabilidad de los parámetros estimados:")
+print(f"  • β₀: {df_resultados['beta0_optimo'].mean():.4f} ± {df_resultados['beta0_optimo'].std():.4f}")
+print(f"  • β₁: {df_resultados['beta1_optimo'].mean():.4f} ± {df_resultados['beta1_optimo'].std():.4f}")
+print(f"  • β₂: {df_resultados['beta2_optimo'].mean():.4f} ± {df_resultados['beta2_optimo'].std():.4f}")
+print()
+
+# Comparación con valores reales
+print("Comparación con valores reales (β₀=50, β₁=1.5, β₂=2):")
+print(f"  • Error medio en β₀: {abs(df_resultados['beta0_optimo'].mean() - 50):.4f}")
+print(f"  • Error medio en β₁: {abs(df_resultados['beta1_optimo'].mean() - 1.5):.4f}")
+print(f"  • Error medio en β₂: {abs(df_resultados['beta2_optimo'].mean() - 2.0):.4f}")
+print("=" * 80)
+print()
+
+# ===================================================================
+# TABLA COMPLETA DE RESULTADOS
+# ===================================================================
+
+print("=" * 80)
+print("TABLA COMPLETA DE RESULTADOS")
+print("=" * 80)
+print()
+print(df_resultados.to_string(index=False))
+print()
+
+# ===================================================================
+# VISUALIZACIONES
+# ===================================================================
+
+fig = plt.figure(figsize=(16, 12))
+gs = fig.add_gridspec(3, 3, hspace=0.3, wspace=0.3)
+
+# 1. Distribución del costo final
+ax1 = fig.add_subplot(gs[0, 0])
+ax1.hist(costos_finales, bins=15, color='steelblue', alpha=0.7, edgecolor='black')
+ax1.axvline(df_resultados['costo_final'].mean(), color='red', linestyle='--', 
+            linewidth=2, label=f'Media = {df_resultados["costo_final"].mean():.4f}')
+ax1.set_xlabel('Costo final F(β*)', fontsize=10)
+ax1.set_ylabel('Frecuencia', fontsize=10)
+ax1.set_title('Distribución del Costo Final', fontsize=12, fontweight='bold')
+ax1.legend(fontsize=9)
+ax1.grid(True, alpha=0.3)
+
+# 2. Distribución de β₀
+ax2 = fig.add_subplot(gs[0, 1])
+ax2.hist(df_resultados['beta0_optimo'], bins=15, color='orange', alpha=0.7, edgecolor='black')
+ax2.axvline(50, color='green', linestyle='--', linewidth=2, label='Real = 50')
+ax2.axvline(df_resultados['beta0_optimo'].mean(), color='red', linestyle='--', 
+            linewidth=2, label=f'Media = {df_resultados["beta0_optimo"].mean():.2f}')
+ax2.set_xlabel('β₀ estimado', fontsize=10)
+ax2.set_ylabel('Frecuencia', fontsize=10)
+ax2.set_title('Distribución de β₀', fontsize=12, fontweight='bold')
+ax2.legend(fontsize=9)
+ax2.grid(True, alpha=0.3)
+
+# 3. Distribución de β₁
+ax3 = fig.add_subplot(gs[0, 2])
+ax3.hist(df_resultados['beta1_optimo'], bins=15, color='purple', alpha=0.7, edgecolor='black')
+ax3.axvline(1.5, color='green', linestyle='--', linewidth=2, label='Real = 1.5')
+ax3.axvline(df_resultados['beta1_optimo'].mean(), color='red', linestyle='--', 
+            linewidth=2, label=f'Media = {df_resultados["beta1_optimo"].mean():.2f}')
+ax3.set_xlabel('β₁ estimado', fontsize=10)
+ax3.set_ylabel('Frecuencia', fontsize=10)
+ax3.set_title('Distribución de β₁', fontsize=12, fontweight='bold')
+ax3.legend(fontsize=9)
+ax3.grid(True, alpha=0.3)
+
+# 4. Distribución de β₂
+ax4 = fig.add_subplot(gs[1, 0])
+ax4.hist(df_resultados['beta2_optimo'], bins=15, color='cyan', alpha=0.7, edgecolor='black')
+ax4.axvline(2.0, color='green', linestyle='--', linewidth=2, label='Real = 2.0')
+ax4.axvline(df_resultados['beta2_optimo'].mean(), color='red', linestyle='--', 
+            linewidth=2, label=f'Media = {df_resultados["beta2_optimo"].mean():.2f}')
+ax4.set_xlabel('β₂ estimado', fontsize=10)
+ax4.set_ylabel('Frecuencia', fontsize=10)
+ax4.set_title('Distribución de β₂', fontsize=12, fontweight='bold')
+ax4.legend(fontsize=9)
+ax4.grid(True, alpha=0.3)
+
+# 5. Costo vs Experimento
+ax5 = fig.add_subplot(gs[1, 1])
+experimentos = df_resultados['experimento']
+colores = ['green' if e else 'red' for e in exitos]
+ax5.scatter(experimentos, costos_finales, c=colores, s=100, alpha=0.7, edgecolors='black')
+ax5.axhline(df_resultados['costo_final'].mean(), color='blue', linestyle='--', 
+            linewidth=2, alpha=0.5, label='Media')
+ax5.set_xlabel('Número de Experimento', fontsize=10)
+ax5.set_ylabel('Costo final F(β*)', fontsize=10)
+ax5.set_title('Costo Final por Experimento', fontsize=12, fontweight='bold')
+ax5.legend(['Media', 'Éxito', 'Fallo'], fontsize=9)
+ax5.grid(True, alpha=0.3)
+
+# 6. Relación β₀ vs β₁
+ax6 = fig.add_subplot(gs[1, 2])
+scatter = ax6.scatter(df_resultados['beta0_optimo'], df_resultados['beta1_optimo'], 
+                     c=costos_finales, s=100, cmap='viridis', alpha=0.7, edgecolors='black')
+ax6.scatter(50, 1.5, color='red', s=200, marker='*', edgecolors='black', 
+           linewidths=2, label='Valor real', zorder=5)
+ax6.set_xlabel('β₀', fontsize=10)
+ax6.set_ylabel('β₁', fontsize=10)
+ax6.set_title('Espacio de Parámetros (β₀ vs β₁)', fontsize=12, fontweight='bold')
+ax6.legend(fontsize=9)
+ax6.grid(True, alpha=0.3)
+plt.colorbar(scatter, ax=ax6, label='Costo')
+
+# 7. Ajuste de datos - Mejor solución
+ax7 = fig.add_subplot(gs[2, :2])
+beta_mejor = df_resultados.loc[idx_mejor, ['beta0_optimo', 'beta1_optimo', 'beta2_optimo']].values
+x_plot = np.linspace(1, 20, 300)
+y_mejor = div(beta_mejor, x_plot)
+ax7.scatter(distancia, lectura_sensor, alpha=0.6, s=70, color='steelblue', 
+           edgecolors='black', linewidths=0.5, label='Datos observados', zorder=3)
+ax7.plot(x_plot, y_mejor, 'r-', linewidth=3, label='Mejor ajuste')
+ax7.set_xlabel('Distancia (metros)', fontsize=10)
+ax7.set_ylabel('Lectura del Sensor', fontsize=10)
+ax7.set_title(f'Mejor Ajuste (Experimento {df_resultados.loc[idx_mejor, "experimento"]}, Costo={df_resultados.loc[idx_mejor, "costo_final"]:.4f})', 
+             fontsize=12, fontweight='bold')
+ax7.legend(fontsize=9)
+ax7.grid(True, alpha=0.3)
+
+# 8. Comparación de múltiples ajustes
+ax8 = fig.add_subplot(gs[2, 2])
+ax8.scatter(distancia, lectura_sensor, alpha=0.6, s=50, color='steelblue', 
+           edgecolors='black', linewidths=0.5, label='Datos', zorder=3)
+# Mostrar 5 ajustes aleatorios
+indices_muestra = np.random.choice(n_experimentos, min(5, n_experimentos), replace=False)
+for idx in indices_muestra:
+    beta_temp = df_resultados.loc[idx, ['beta0_optimo', 'beta1_optimo', 'beta2_optimo']].values
+    y_temp = div(beta_temp, x_plot)
+    ax8.plot(x_plot, y_temp, alpha=0.5, linewidth=2)
+ax8.set_xlabel('Distancia (metros)', fontsize=10)
+ax8.set_ylabel('Lectura del Sensor', fontsize=10)
+ax8.set_title('Comparación de Múltiples Ajustes', fontsize=12, fontweight='bold')
+ax8.legend(['Datos'] + [f'Exp. {i+1}' for i in indices_muestra], fontsize=8)
+ax8.grid(True, alpha=0.3)
+
+plt.suptitle('Análisis de Sensibilidad a Inicializaciones Aleatorias', 
+            fontsize=16, fontweight='bold', y=0.995)
+plt.show()
+
+# ===================================================================
+# CONCLUSIONES
+# ===================================================================
+
+print("=" * 80)
+print("CONCLUSIONES DEL ANÁLISIS DE SENSIBILIDAD")
+print("=" * 80)
+print()
+
+# Analizar si hay mínimos locales
+rango_costo = df_resultados['costo_final'].max() - df_resultados['costo_final'].min()
+cv_costo = df_resultados['costo_final'].std() / df_resultados['costo_final'].mean()
+
+if cv_costo < 0.01:
+    print("✓ BAJA SENSIBILIDAD:")
+    print("  El problema parece tener un único mínimo global bien definido.")
+    print("  Todas las inicializaciones convergen a soluciones muy similares.")
+elif cv_costo < 0.05:
+    print("⚠ SENSIBILIDAD MODERADA:")
+    print("  Hay cierta variabilidad en los resultados según la inicialización.")
+    print("  Se recomienda usar múltiples puntos de partida en aplicaciones críticas.")
+else:
+    print("⚠ ALTA SENSIBILIDAD:")
+    print("  El problema tiene múltiples mínimos locales.")
+    print("  Es CRUCIAL usar múltiples inicializaciones aleatorias.")
+
+print()
+print(f"Coeficiente de variación del costo: {cv_costo:.4f}")
+print(f"Rango de costos finales: {rango_costo:.6f}")
+print()
+
+# Recomendación
+mejor_costo = df_resultados['costo_final'].min()
+print("Recomendación:")
+print(f"  Usar la solución del Experimento {df_resultados.loc[idx_mejor, 'experimento']} con:")
+print(f"    β₀ = {df_resultados.loc[idx_mejor, 'beta0_optimo']:.4f}")
+print(f"    β₁ = {df_resultados.loc[idx_mejor, 'beta1_optimo']:.4f}")
+print(f"    β₂ = {df_resultados.loc[idx_mejor, 'beta2_optimo']:.4f}")
+print(f"    Costo = {mejor_costo:.6f}")
+
+print("=" * 80)
