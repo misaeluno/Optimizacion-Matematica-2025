@@ -50,18 +50,18 @@ for i in range(n_experimentos):
     
     # Guardar resultados
     resultados.append({
-        '/n experimento': i + 1,
-        '/n beta0_inicial': beta[0],
-        '/n beta1_inicial': beta[1],
-        '/n beta2_inicial': beta[2],
-        '/n beta0_optimo': resultado.x[0],
-        '/n beta1_optimo': resultado.x[1],
-        '/n beta2_optimo': resultado.x[2],
-        '/n costo_final': resultado.fun,
-        '/n exito': resultado.success,
-        '/n n_iteraciones': resultado.nit,
-        '/n n_evaluaciones': resultado.nfev
+        'experimento': i + 1,
+        'beta0_inicial': beta[0],
+        'beta1_inicial': beta[1],
+        'beta2_inicial': beta[2],
+        'beta0_optimo': resultado.x[0],
+        'beta1_optimo': resultado.x[1],
+        'beta2_optimo': resultado.x[2],
+        'costo_final': resultado.fun,
+        'exito': resultado.success,
+        'n_iteraciones': resultado.nit,
+        'n_evaluaciones': resultado.nfev
     })
-
-
-print(resultados)
+for i in resultados:
+    for j, k in i.items():
+        print(f"{j}: {k}")

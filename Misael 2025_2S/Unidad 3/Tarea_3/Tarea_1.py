@@ -7,9 +7,7 @@ import math as mate
 import scipy.special
 # semilla
 np.random.seed(2025)
-
 m = 100
-
 # Variable independiente (usuarios)
 # NUMERO DE USUARIOS   = X
 usuarios = np.random.uniform(10, 100, m)
@@ -17,8 +15,7 @@ usuarios = np.random.uniform(10, 100, m)
 lambda_real = np.exp(0.5 + 0.03 * usuarios)
 # NUMERO DE PETICIONES = Y
 peticiones = np.random.poisson(lambda_real)
-datos_pregunta_1 = pd.DataFrame({"Usuarios": usuarios,
-"Peticiones": peticiones})
+datos_pregunta_1 = pd.DataFrame({"Usuarios": usuarios,"Peticiones": peticiones})
 print(datos_pregunta_1.head())
 
 #parametros inicales
@@ -28,7 +25,6 @@ epsilon = 1e-6  # Tolerancia para convergencia
 iteraciones = 100000
 diezPor = iteraciones*0.1
 tolerancia = 1e-9
-
 
 # Calculo de Lambda
 def Landa(usuarios, beta):
@@ -121,11 +117,3 @@ usuarios_nuevos = np.array([25, 50, 75, 100])
 for u in usuarios_nuevos:
     lambda_pred = Landa(u, b)
     print(f"Usuarios: {u:3d} → Tasa predicha (λ): {lambda_pred:8.2f} peticiones/min")
-
-fig, ax = plt.subplots()
-ax.plot(range(len(C)), C, label='Costo J segun Beta')
-ax.set_xlabel('Iteraciones')
-ax.set_ylabel('Costo J segun Beta')
-ax.set_title('Evolución del Costo durante el Descenso del Gradiente')
-ax.legend()
-plt.show()
